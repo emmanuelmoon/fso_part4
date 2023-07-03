@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-const _ = require('lodash');
-
 const dummy = () => 1;
 
 const totalLikes = (blogs) => blogs.reduce((sum, blog) => sum + blog.likes, 0);
@@ -28,11 +25,46 @@ const mostBlogs = (blogs) => {
     }
   });
 
-  const maxKey = _.max(Object.keys(obj), (o) => obj[o]);
+  let author = '';
+  let blogsNum = -1;
+
+  Object.keys(obj).forEach((key) => {
+    if (obj[key] > blogsNum) {
+      author = key;
+      blogsNum = obj[key];
+    }
+  });
 
   return {
-    author: maxKey,
-    blogs: obj[maxKey],
+    author,
+    blogs: blogsNum,
+  };
+};
+
+const mostLikes = (blogs) => {
+  const obj = {};
+
+  for (let i = 0; i < blogs.length; i += 1) {
+    if (obj[blogs[i].author] === undefined) {
+      obj[blogs[i].author] = blogs[i].likes;
+    } else {
+      obj[blogs[i].author] += blogs[i].likes;
+    }
+  }
+
+  let author = '';
+  let likes = -1;
+
+  Object.keys(obj).forEach((key) => {
+    if (obj[key] > likes) {
+      author = key;
+      likes = obj[key];
+    }
+  });
+
+  return {
+    author,
+    likes,
   };
 };
 
@@ -41,4 +73,5 @@ module.exports = {
   totalLikes,
   favoriteBlog,
   mostBlogs,
+  mostLikes,
 };
