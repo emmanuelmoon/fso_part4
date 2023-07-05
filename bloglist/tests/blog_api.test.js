@@ -30,6 +30,37 @@ test('all blogs are returned', async () => {
   expect(response.body).toHaveLength(helper.initialBlogs.length);
 });
 
+test('blog has the property id', async () => {
+  const response = await api.get('/api/blogs');
+
+  response.body.forEach((blog) => {
+    expect(blog.id).toBeDefined();
+  });
+});
+
+test('blog post is saved correctly', async () => {
+  const newBlog = {
+    title: 'npm audit: Broken by Design',
+    author: 'Dan Abramov',
+    url: 'https://overreacted.io/npm-audit-broken-by-design/',
+    likes: 0,
+  };
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/);
+
+  const blogsAtEnd = await helper.blogsInDb();
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1);
+
+  const contents = blogsAtEnd.map((b) => b.title);
+  expect(contents).toContain(
+    'npm audit: Broken by Design',
+  );
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 }, 100000);

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const config = require('./utils/config');
 
 const app = express();
+app.use(express.json());
 
 const blogsRouter = require('./controllers/blog');
 const logger = require('./utils/logger');
@@ -20,6 +21,5 @@ mongoose.connect(config.MONGODB_URI)
   });
 
 app.use(cors());
-app.use(express.json());
 
 module.exports = app;
