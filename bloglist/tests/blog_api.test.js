@@ -92,6 +92,36 @@ test('likes default to zero when the field is missing', async () => {
   });
 });
 
+test('Backend repos', async () => {
+  const newBlog = {
+    author: 'Dan Abramov',
+    url: 'https://overreacted.io/npm-audit-broken-by-design/',
+    likes: 0,
+  };
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400);
+
+  const blogsAtEnd = await helper.blogsInDb();
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length);
+
+  const newBlog2 = {
+    title: 'npm audit: Broken by Design',
+    author: 'Dan Abramov',
+    likes: 0,
+  };
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog2)
+    .expect(400);
+
+  const blogsAtEnd2 = await helper.blogsInDb();
+  expect(blogsAtEnd2).toHaveLength(helper.initialBlogs.length);
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 }, 100000);
