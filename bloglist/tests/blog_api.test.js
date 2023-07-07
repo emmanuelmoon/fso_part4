@@ -92,7 +92,7 @@ test('likes default to zero when the field is missing', async () => {
   });
 });
 
-test('Backend repos', async () => {
+test('If url or title are missing, 400 status code is returned', async () => {
   const newBlog = {
     author: 'Dan Abramov',
     url: 'https://overreacted.io/npm-audit-broken-by-design/',
@@ -120,6 +120,57 @@ test('Backend repos', async () => {
 
   const blogsAtEnd2 = await helper.blogsInDb();
   expect(blogsAtEnd2).toHaveLength(helper.initialBlogs.length);
+});
+
+describe('deletion of a blog', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb();
+    const blogToDelete = blogsAtStart[0];
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204);
+
+    const blogsAtEnd = await helper.blogsInDb();
+
+    expect(blogsAtEnd).toHaveLength(
+      helper.initialBlogs.length - 1,
+    );
+
+    const titles = blogsAtEnd.map((r) => r.title);
+
+    expect(titles).not.toContain(blogToDelete.title);
+  });
+});
+
+describe('updating of a blog', () => {
+  test('succeeds if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb();
+    const blogToUpdate = blogsAtStart[0];
+    const oldTitle = blogToUpdate.title;
+
+    const newBlog = {
+      title: 'Hey yo!',
+      author: blogToUpdate.author,
+      url: blogToUpdate.url,
+      likes: blogToUpdate.likes,
+    };
+
+    await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(newBlog)
+      .expect(200);
+
+    const blogsAtEnd = await helper.blogsInDb();
+
+    expect(blogsAtEnd).toHaveLength(
+      helper.initialBlogs.length,
+    );
+
+    const titles = blogsAtEnd.map((r) => r.title);
+
+    expect(titles).not.toContain(oldTitle);
+  });
 });
 
 afterAll(async () => {

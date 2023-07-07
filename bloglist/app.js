@@ -7,6 +7,7 @@ const app = express();
 app.use(express.json());
 
 const blogsRouter = require('./controllers/blog');
+const middleware = require('./utils/middleware');
 const logger = require('./utils/logger');
 
 mongoose.set('strictQuery', false);
@@ -21,5 +22,7 @@ mongoose.connect(config.MONGODB_URI)
   });
 
 app.use(cors());
+app.use(middleware.unknownEndpoint);
+app.use(middleware.errorHandler);
 
 module.exports = app;
