@@ -7,12 +7,14 @@ require('express-async-errors');
 const app = express();
 app.use(express.json());
 
+const loginRouter = require('./controllers/login');
 const blogsRouter = require('./controllers/blog');
 const usersRouter = require('./controllers/user');
 const middleware = require('./utils/middleware');
 const logger = require('./utils/logger');
 
 mongoose.set('strictQuery', false);
+app.use('/api/login', loginRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/blogs', blogsRouter);
 
