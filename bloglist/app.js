@@ -14,6 +14,7 @@ const middleware = require('./utils/middleware');
 const logger = require('./utils/logger');
 
 app.use(middleware.tokenExtractor);
+app.use(middleware.userExtractor);
 
 mongoose.set('strictQuery', false);
 app.use('/api/login', loginRouter);
