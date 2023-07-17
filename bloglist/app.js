@@ -13,6 +13,8 @@ const usersRouter = require('./controllers/user');
 const middleware = require('./utils/middleware');
 const logger = require('./utils/logger');
 
+app.use(middleware.tokenExtractor);
+
 mongoose.set('strictQuery', false);
 app.use('/api/login', loginRouter);
 app.use('/api/users', usersRouter);
