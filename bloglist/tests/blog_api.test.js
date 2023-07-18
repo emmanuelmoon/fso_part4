@@ -1,16 +1,44 @@
+/* eslint-disable no-underscore-dangle */
 const mongoose = require('mongoose');
+const bcryptjs = require('bcryptjs');
 const supertest = require('supertest');
 const helper = require('./test_helper');
 const app = require('../app');
 
 const api = supertest(app);
 const Blog = require('../models/blog');
+const User = require('../models/user');
+const jwt = require('jsonwebtoken');
+
+let token;
 
 beforeEach(async () => {
+  await User.deleteMany({});
+
+  const username = 'lilmoon';
+  const name = 'moon';
+
+  const passwordHash = await bcryptjs.hash('3132', 10);
+
+  const user = new User({
+    username,
+    name,
+    passwordHash,
+  });
+
+  await user.save();
+
+  const userForToken = {
+    username: user.username,
+    id: user._id,
+  };
+
+  token = jwt.sign(userForToken, process.env.SECRET);
+
   await Blog.deleteMany({});
 
   const blogObjects = helper.initialBlogs
-    .map((blog) => Blog(blog));
+    .map((blog) => Blog({ ...blog, user: user._id }));
 
   const promiseArray = blogObjects.map((blog) => blog.save());
 
@@ -48,6 +76,7 @@ test('blog post is saved correctly', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/);
@@ -70,6 +99,7 @@ test('likes default to zero when the field is missing', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/);
@@ -101,6 +131,7 @@ test('If url or title are missing, 400 status code is returned', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400);
 
@@ -115,6 +146,7 @@ test('If url or title are missing, 400 status code is returned', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog2)
     .expect(400);
 
@@ -129,6 +161,7 @@ describe('deletion of a blog', () => {
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(204);
 
     const blogsAtEnd = await helper.blogsInDb();
