@@ -206,6 +206,29 @@ describe('updating of a blog', () => {
   });
 });
 
+test('status 401 if no token', async () => {
+  const newBlog = {
+    title: 'npm audit: Broken by Design',
+    author: 'Dan Abramov',
+    url: 'https://overreacted.io/npm-audit-broken-by-design/',
+    likes: 0,
+  };
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(401)
+    .expect('Content-Type', /application\/json/);
+
+  const blogsAtEnd = await helper.blogsInDb();
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length);
+
+  const contents = blogsAtEnd.map((b) => b.title);
+  expect(contents).not.toContain(
+    'npm audit: Broken by Design',
+  );
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 }, 100000);

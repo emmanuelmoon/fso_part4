@@ -13,20 +13,24 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.post('/', async (request, response) => {
   const { body, user } = request;
 
-  const blog = new Blog({
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes,
-    user: user._id,
-  });
+  if (user) {
+    const blog = new Blog({
+      title: body.title,
+      author: body.author,
+      url: body.url,
+      likes: body.likes,
+      user: user._id,
+    });
 
-  const savedBlog = await blog.save();
-  user.blogs = user.blogs.concat(savedBlog._id);
+    const savedBlog = await blog.save();
+    user.blogs = user.blogs.concat(savedBlog._id);
 
-  await user.save();
+    await user.save();
 
-  response.status(201).json(savedBlog);
+    response.status(201).json(savedBlog);
+  } else {
+    return response.status(401).json({ error: 'Invalid token' });
+  }
 });
 
 blogsRouter.delete('/:id', async (request, response) => {
