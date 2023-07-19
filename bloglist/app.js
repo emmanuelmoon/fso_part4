@@ -5,6 +5,7 @@ const config = require('./utils/config');
 require('express-async-errors');
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const loginRouter = require('./controllers/login');
@@ -29,7 +30,6 @@ mongoose.connect(config.MONGODB_URI)
     logger.error('error connecting to MongoDB:', error.message);
   });
 
-app.use(cors());
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
 
